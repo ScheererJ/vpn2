@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # use TCP instead of UDP (commonly not supported by load balancers)
-proto tcp-client
+proto tcp6-client
 
 # don't cache authorization information in memory
 auth-nocache
@@ -44,5 +44,5 @@ tls-auth "/srv/secrets/tlsauth/vpn.tlsauth" 1
 remote-cert-tls server
 
 # pull filter
-pull-filter ignore "route ${SERVICE_NETWORK_ADDRESS} ${SERVICE_NETWORK_NETMASK}"
-pull-filter ignore "route ${POD_NETWORK_ADDRESS} ${POD_NETWORK_NETMASK}"
+pull-filter ignore "route-ipv6 ${SERVICE_NETWORK}"
+pull-filter ignore "route-ipv6 ${POD_NETWORK}"

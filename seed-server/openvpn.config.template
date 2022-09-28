@@ -14,7 +14,7 @@
 
 mode server
 tls-server
-proto tcp4-server
+proto tcp6-server
 dev tun0
 topology subnet
 
@@ -37,10 +37,10 @@ up "/firewall.sh on"
 down "/firewall.sh off"
 
 keepalive 10 60
-server 192.168.123.0 255.255.255.0
+server-ipv6 2001:db8:0:123::/64
 
-route ${SERVICE_NETWORK_ADDRESS} ${SERVICE_NETWORK_NETMASK}
-route ${POD_NETWORK_ADDRESS} ${POD_NETWORK_NETMASK}
+route-ipv6 "${SERVICE_NETWORK}"
+route-ipv6 "${POD_NETWORK}"
 
 # the vpn client in the shoot will expose its pod, service and node network.
 # hence, we need a client-config-dir to specify the shoot client.

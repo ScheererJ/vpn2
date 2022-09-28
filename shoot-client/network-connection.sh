@@ -73,55 +73,18 @@ node_network="${node_network:-}"
 
 reversed_vpn_header="${REVERSED_VPN_HEADER:-invalid-host}"
 
-# calculate netmask for given CIDR (required by openvpn)
-CIDR2Netmask() {
-    local cidr="$1"
-
-    local ip=$(echo $cidr | cut -f1 -d/)
-    local numon=$(echo $cidr | cut -f2 -d/)
-
-    local numoff=$(( 32 - $numon ))
-    while [ "$numon" -ne "0" ]; do
-            start=1${start}
-            numon=$(( $numon - 1 ))
-    done
-    while [ "$numoff" -ne "0" ]; do
-        end=0${end}
-        numoff=$(( $numoff - 1 ))
-    done
-    local bitstring=$start$end
-
-    bitmask=$(echo "obase=16 ; $(( 2#$bitstring )) " | bc | sed 's/.\{2\}/& /g')
-
-    for t in $bitmask ; do
-        str=$str.$((16#$t))
-    done
-
-    echo $str | cut -f2-  -d\.
-}
-
-service_network_address=$(echo $service_network | cut -f1 -d/)
-service_network_netmask=$(CIDR2Netmask $service_network)
-
-pod_network_address=$(echo $pod_network | cut -f1 -d/)
-pod_network_netmask=$(CIDR2Netmask $pod_network)
-
-sed -e "s/\${SERVICE_NETWORK_ADDRESS}/${service_network_address}/" \
-    -e "s/\${SERVICE_NETWORK_NETMASK}/${service_network_netmask}/" \
-    -e "s/\${POD_NETWORK_ADDRESS}/${pod_network_address}/" \
-    -e "s/\${POD_NETWORK_NETMASK}/${pod_network_netmask}/" \
+sed -e "s/\${SERVICE_NETWORK}/${service_network}/" \
+    -e "s/\${POD_NETWORK}/${pod_network}/" \
     openvpn.config.template > openvpn.config
 
 if [[ ! -z "$node_network" ]]; then
   for n in $(echo $node_network |  sed 's/[][]//g' | sed 's/,/ /g')
   do
-      node_network_address=$(echo $n | cut -f1 -d/)
-      node_network_netmask=$(CIDR2Netmask $n)
-      echo "pull-filter ignore \"route ${node_network_address} ${node_network_netmask}\"" >> openvpn.config
+      echo "pull-filter ignore \"route-ipv6 ${node_network}\"" >> openvpn.config
   done
 fi
 
-echo "pull-filter accept \"route 192.168.123.\"" >> openvpn.config
+echo "pull-filter accept \"route-ipv6 2001:db8:0:123::/64\"" >> openvpn.config
 echo "pull-filter ignore \"route\"" >> openvpn.config
 echo "pull-filter ignore redirect-gateway" >> openvpn.config
 echo "pull-filter ignore route-ipv6" >> openvpn.config
