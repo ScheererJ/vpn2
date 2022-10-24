@@ -14,7 +14,7 @@
 
 FROM alpine:3.16.2 as builder
 
-RUN apk add --update bash openvpn iptables bc && \
+RUN apk add --update bash openvpn iptables ip6tables bc && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /volume
@@ -78,7 +78,8 @@ RUN mkdir -p ./bin ./sbin ./lib ./usr/bin ./usr/sbin ./usr/lib ./usr/lib/xtables
     && cp -d /usr/lib/libip6* ./usr/lib                                     && echo "package iptables" \
     && cp -d /usr/lib/libipq* ./usr/lib                                     && echo "package iptables" \
     && cp -d /usr/lib/libxtables* ./usr/lib                                 && echo "package iptables" \
-    && cp -d /usr/lib/xtables/* ./usr/lib/xtables                           && echo "package iptables"
+    && cp -d /usr/lib/xtables/* ./usr/lib/xtables                           && echo "package iptables" \
+    && cp -d /sbin/ip6tables* ./sbin                                        && echo "package ip6tables"
 
 FROM scratch
 

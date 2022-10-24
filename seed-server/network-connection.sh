@@ -36,12 +36,12 @@ pod_network="${pod_network:-100.96.0.0/11}"
 node_network="${NODE_NETWORK:-${fileNodeNetwork}}"
 node_network="${node_network:-}"
 
-sed -e "s/\${SERVICE_NETWORK}/${service_network}/" \
-    -e "s/\${POD_NETWORK}/${pod_network}/" \
+sed -e "s#\${SERVICE_NETWORK}#${service_network}#" \
+    -e "s#\${POD_NETWORK}#${pod_network}#" \
     openvpn.config.template > openvpn.config
 
-sed -e "s/\${SERVICE_NETWORK}/${service_network}/" \
-    -e "s/\${POD_NETWORK}/${pod_network}/" \
+sed -e "s#\${SERVICE_NETWORK}#${service_network}#" \
+    -e "s#\${POD_NETWORK}#${pod_network}#" \
     /client-config-dir/vpn-shoot-client.template > /client-config-dir/vpn-shoot-client
 
 if [[ ! -z "$node_network" ]]; then
@@ -52,7 +52,9 @@ if [[ ! -z "$node_network" ]]; then
     done
 fi
 
+echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+
 local_node_ip="${LOCAL_NODE_IP:-255.255.255.255}"
 
 # filter log output to remove readiness/liveness probes from local node
-openvpn --config openvpn.config | grep -v -E "TCP connection established with \[AF_INET\]${local_node_ip}|${local_node_ip}:[0-9]{1,5} Connection reset, restarting"
+openvpn --config openvpn.config | grep -v -E "TCP connection established with \[AF_INET6\]${local_node_ip}|${local_node_ip}:[0-9]{1,5} Connection reset, restarting"

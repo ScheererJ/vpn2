@@ -73,8 +73,8 @@ node_network="${node_network:-}"
 
 reversed_vpn_header="${REVERSED_VPN_HEADER:-invalid-host}"
 
-sed -e "s/\${SERVICE_NETWORK}/${service_network}/" \
-    -e "s/\${POD_NETWORK}/${pod_network}/" \
+sed -e "s#\${SERVICE_NETWORK}#${service_network}#" \
+    -e "s#\${POD_NETWORK}#${pod_network}#" \
     openvpn.config.template > openvpn.config
 
 if [[ ! -z "$node_network" ]]; then
@@ -90,9 +90,10 @@ echo "pull-filter ignore redirect-gateway" >> openvpn.config
 echo "pull-filter ignore route-ipv6" >> openvpn.config
 echo "pull-filter ignore redirect-gateway-ipv6" >> openvpn.config
 
+
 # enable forwarding and NAT
-iptables --append FORWARD --in-interface tun0 -j ACCEPT
-iptables --append POSTROUTING --out-interface eth0 --table nat -j MASQUERADE
+echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+ip6tables --append POSTROUTING --out-interface eth0 --table nat -j MASQUERADE
 
 while : ; do
     if [[ ! -z $ENDPOINT ]]; then
